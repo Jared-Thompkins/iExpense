@@ -13,11 +13,30 @@ struct ContentView: View {
     
     var body: some View {
         NavigationView {
-            List {
-                ForEach(expenses.items) { item in
-                    Text(item.name)
+            Form {
+                List {
+                    ForEach(expenses.items) { item in
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text(item.name)
+                                    .font(.headline)
+                                Text(item.type)
+                            }
+                            Spacer()
+                            Text(item.amount, format: .currency(code: "USD"))
+                        }
+                    }
+                    .onDelete(perform: removeItems)
                 }
-                .onDelete(perform: removeItems)
+                Section {
+                    HStack {
+                        Text("Total expenses:")
+                            .font(.headline)
+                        Spacer()
+                        Text("\(itemSum(), format: .currency(code: "USD"))")
+                            .font(.headline)
+                    }
+                }
             }
             .navigationTitle("iExpense")
             .toolbar {
@@ -30,11 +49,18 @@ struct ContentView: View {
             .sheet(isPresented: $showingAddExpense) {
                 AddView(expenses: expenses)
             }
+            
         }
     }
     
     func removeItems(at offsets: IndexSet) {
         expenses.items.remove(atOffsets: offsets)
+    }
+    
+    func itemSum() -> Double {
+        return expenses.items.reduce(0) { result, item in
+            result + item.amount
+        }
     }
 }
 
